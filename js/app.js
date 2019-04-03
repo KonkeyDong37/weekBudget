@@ -5,6 +5,11 @@ class Budget {
         this.budget = Number(budget);
         this.budgetLeft = this.budget;
     }
+
+    // Substrack from the budget
+    substractFromBudget(amount) {
+        return this.budgetLeft -= amount;
+    }
 }
 
 // Everything related to HTML
@@ -28,7 +33,41 @@ class HTML {
         // Clear the error
         setTimeout(() => {
             document.querySelector('.primary .alert').remove();
+            addExpenseForm.reset();
         }, 3000);
+    }
+
+    // Displays the expenses from the form into the list
+    addExpendsToList(name, amount) {
+        const expensesList = document.querySelector('#expenses ul');
+
+        // Create a li
+        const li = document.createElement('li');
+        li.className = "list-group-item d-flex justify-content-between align-items-center";
+        // Create the template
+        li.innerHTML = `
+            ${name}
+            <span class="badge badge-primary badge-pill">${amount}</span>
+        `
+
+        // Insert into the HTML
+        expensesList.appendChild(li);
+    }
+
+    // Subtract expense amount from budget
+    trackBudget(amount) {
+        const budgetLeftDollars = budget.substractFromBudget(amount);
+
+        budgetLeft.innerHTML = `${budgetLeftDollars}`;
+
+        // Check when 25% is spent
+        if( (budget.budget / 4) > budgetLeftDollars ) {
+            budgetLeft.parentElement.parentElement.classList.remove('alert-warning', 'alert-success');
+            budgetLeft.parentElement.parentElement.classList.add('alert-danger');
+        } else if ( (budget.budget / 2) > budgetLeftDollars ) {
+            budgetLeft.parentElement.parentElement.classList.remove('alert-success');
+            budgetLeft.parentElement.parentElement.classList.add('alert-warning');
+        }
     }
 }
 
@@ -78,7 +117,11 @@ function eventListeners() {
             html.printMessage('There was error, all the fields are mandatory',
             'alert-danger')
         } else {
-
+            // Add the Expenses into the list
+            html.addExpendsToList(expenseName, amount);
+            html.trackBudget(amount);
+            html.printMessage('Added...',
+            'alert-success')
         }
     })
 }
